@@ -1,0 +1,14 @@
+{
+  "name": "hanoi",
+  "version": "1.0.0",
+  "description": "project for PA",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "pedroyen",
+  "license": "ISC",
+  "dependencies": {
+    "three": "^0.167.1"
+  }
+}
