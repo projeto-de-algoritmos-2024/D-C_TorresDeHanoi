@@ -1,4 +1,6 @@
 import { defineConfig } from 'vite'
+import topLevelAwait from "vite-plugin-top-level-await";
+
 
 export default defineConfig({
   base: '/D-C_TorresDeHanoi/',
@@ -9,5 +11,11 @@ export default defineConfig({
   alias: {
     'orbit': '/node_modules/three/examples/jsm/controls/OrbitControls.js',
     'three': '/node_modules/three/build/three.module.js'
-  }
+  },
+  esbuild: {
+    target: 'esnext',  // Configura o ambiente para o mais recente suporte
+  },
+  plugins: [
+    topLevelAwait(),
+  ],
 })
