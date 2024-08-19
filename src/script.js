@@ -10,7 +10,7 @@ class Game {
         this.disks = [];
         this.moveList = [];
 
-        this.pegDisks = {0: [], 1:  [], 2: []}; // Discos em cada haste
+        this.pegDisks = {0: [], 1: [], 2: []}; // Discos em cada haste
         this.fov = 50;
         this.aspect = 2.25; // the canvas default
         this.near = 0.1;
@@ -21,21 +21,36 @@ class Game {
         this.camera.position.set(0, 0, 30); 
         this.camera.lookAt(0, 0, 0); // Garanta que a câmera esteja olhando para o centro da cena
         
+        this.fromPeg = document.querySelector('#fromPeg');
+        this.fromPeg.addEventListener('change', () => {
+            this.pegDisks = {0: [], 1: [], 2: []};
+            this.clearDisks();
+            this.addDisksToScene(parseInt(this.fromPeg.value));
+            this.addPegsToScene();
+            this.createPlatform();
+        })
+        
+        this.toPeg = document.querySelector('#toPeg');
+        this.toPeg.addEventListener('change', () => {
+        })
+        
         this.buttonSolve = document.querySelector('#solve');
         this.buttonSolve.addEventListener('click', async () => {
             await this.solve();
         })
+
         this.buttonReset = document.querySelector('#reset');
         this.buttonReset.addEventListener('click', async () => {
             this.reset();
         })
+        
         this.inputDisks = document.querySelector('#numberDisks');
         this.inputDisks.value = this.numDisks;
         this.inputDisks.addEventListener('change', () => {
             this.clearDisks();
             this.numDisks = this.inputDisks.value;
             this.pegDisks = {0: [], 1: [], 2: []};
-            this.addDisksToScene();
+            this.addDisksToScene(parseInt(this.fromPeg.value));
         })
 
         this.movementsList = document.querySelector('#movementsList');
@@ -89,24 +104,12 @@ class Game {
         this.pegDisks = {0: [], 1: [], 2: []}; // Reinicializa as hastes
 
         // Adiciona discos e hastes novamente
-        this.addDisksToScene();
+        this.addDisksToScene(parseInt(this.fromPeg.value));
         this.addPegsToScene();
         this.createPlatform();
 
         // Reinicia a animação
         this.startAnimation();
-    }
-
-    createDisk(size, color, y, pegIndex) {
-        const geometry = new THREE.CylinderGeometry(size, size, this.diskHeight, 32);
-        const material = new THREE.MeshBasicMaterial({ color: color });
-        const disk = new THREE.Mesh(geometry, material);
-        disk.position.y = y;
-        disk.position.z = 0; // Alinhar discos no eixo Z
-        this.pegDisks[pegIndex].push(disk); // Adiciona o disco à haste correspondente
-
-        this.disks.push(disk);
-        return disk;
     }
 
     clearDisks() {
@@ -117,20 +120,33 @@ class Game {
         
         this.disks = []; // Limpar o array de discos
     }
-
-    addDisksToScene() {
+    
+    addDisksToScene(peg = 1) {
         const baseDiskSize = 6;  // Tamanho do maior disco
         const sizeDecrement = 0.5;  // Redução de tamanho para cada disco menor
-
+        
         for (let i = 0; i < this.numDisks; i++) {
             const size = baseDiskSize - (i * sizeDecrement);
             const y = this.baseHeight+0.5 + (i * this.diskHeight);  // Empilhando os discos na base
             const color = new THREE.Color(`${this.colors[i]}`);
-            const disk = this.createDisk(size, color, y, 1);
+            const disk = this.createDisk(size, color, (peg-1)*14 ,y, parseInt(this.fromPeg.value));
             this.scene.add(disk);
         }
     }
 
+    createDisk(size, color, x, y, pegIndex) {
+        const geometry = new THREE.CylinderGeometry(size, size, this.diskHeight, 32);
+        const material = new THREE.MeshBasicMaterial({ color: color });
+        const disk = new THREE.Mesh(geometry, material);
+        disk.position.x = x;
+        disk.position.y = y;
+        disk.position.z = 0; // Alinhar discos no eixo Z
+        this.pegDisks[pegIndex].push(disk); // Adiciona o disco à haste correspondente
+
+        this.disks.push(disk);
+        return disk;
+    }
+    
     async solve() {
         let steps = [];
         function h(numDisks, from, to) {
@@ -141,33 +157,34 @@ class Game {
                 h(numDisks - 1, other, to);
             }
         }
-        h(this.numDisks, 1, 2);
-        console.log(steps);
-        console.log(this.pegDisks);
+        h(this.numDisks, parseInt(this.fromPeg.value), parseInt(this.toPeg.value));
+        // h(this.numDisks, 1, 2);
+        // console.log(steps);
+        // console.log(this.pegDisks);
         for (let i = 0; i < steps.length; i++) {
             await this.moveDisk(steps[i][0], steps[i][1]);
         }
     }
 
     async moveDisk(fromPeg, toPeg) {
-        console.log(fromPeg, toPeg)
+        // console.log(fromPeg, toPeg)
         const disk = this.pegDisks[fromPeg].pop(); // Retira o último disco da haste de origem
         if (!disk) return;
-        console.log(disk);
+        // console.log(disk);
         const targetY = this.baseHeight + .5 + (this.pegDisks[toPeg].length * this.diskHeight);
 
         // Movimento 1: Levantar o disco
-        console.log('levantar')
+        // console.log('levantar')
         await this.animateMovement(disk, { y: 9 });
         this.addMovementToList(fromPeg, toPeg);
 
         // Movimento 2: Mover horizontalmente para a haste de destino
         const targetX = (toPeg - 1) * 14;
-        console.log('mover horizontal')
+        // console.log('mover horizontal')
         await this.animateMovement(disk, { x: targetX });
 
         // Movimento 3: Descer o disco
-        console.log('descer')
+        // console.log('descer')
         await this.animateMovement(disk, { y: targetY });
 
         this.pegDisks[toPeg].push(disk); // Adiciona o disco à nova haste

@@ -1,15 +1,28 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Torres de Hanói</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <h1>Torres de Hanoi</h1>
-    <div><p>Escolha a quantidade de discos: </p>
-        <input id="numberDisks" type="number" min="1" max="8">
+    <div>
+        <p>Escolha a quantidade de discos: </p>
+        <select id="fromPeg">
+            <option value="0">A</option>
+            <option value="1" selected>B</option>
+            <option value="2">C</option>
+        </select>
+        <select id="toPeg">
+            <option value="0">A</option>
+            <option value="1">B</option>
+            <option value="2" selected>C</option>
+        </select>
+        <input type="number" name="discs" id="numberDisks" min="1" max="8">
         <button id="solve">Resolver</button>
         <button id="reset">Reiniciar</button>
     </div>
@@ -26,4 +39,5 @@
 
     <script type="module" src="./script.js"></script>
 </body>
+
 </html>
