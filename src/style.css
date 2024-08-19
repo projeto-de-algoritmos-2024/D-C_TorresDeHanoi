@@ -3,3 +3,27 @@ body {
     text-align: center;
     margin-top: 50px;
 }
+#canvas {
+    margin-top: 30px;
+}
+
+#side {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    max-width: 1000px;
+}
+
+#movements {
+    margin-left: 30px;
+    margin-top: 0;
+    font-size: 2rem;
+}
+
+#movements p {
+    margin-top: 0;
+}
+
+#movements li {
+    font-size: 1.2rem;
+}

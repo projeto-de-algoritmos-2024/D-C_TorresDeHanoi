@@ -2,11 +2,14 @@ import { step } from 'three/webgpu';
 import * as THREE from '../node_modules/three/build/three.module.js';
 import { OrbitControls } from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
 
+
 class Game {
     constructor(numDisks) {
         this.numDisks = numDisks;
         this.isAnimating = true;
         this.disks = [];
+        this.moveList = [];
+
         this.pegDisks = {0: [], 1:  [], 2: []}; // Discos em cada haste
         this.fov = 50;
         this.aspect = 2.25; // the canvas default
@@ -31,15 +34,18 @@ class Game {
         this.inputDisks.addEventListener('change', () => {
             this.clearDisks();
             this.numDisks = this.inputDisks.value;
+            this.pegDisks = {0: [], 1:  [], 2: []};
             this.addDisksToScene();
         })
+
+        this.movementsList = document.querySelector('#movementsList');
 
         this.canvas = document.querySelector('#canvas');
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,
             canvas
         });
-        this.renderer.setSize((window.innerWidth*0.95), (window.innerWidth * .4))
+        this.renderer.setSize((window.innerWidth*0.8), (window.innerWidth * .4))
         this.scene = new THREE.Scene();
         
 
@@ -72,8 +78,14 @@ class Game {
     }
 
     reset() {
+        this.stopAnimation();
         // Limpa a cena atual
         this.clearDisks();
+        this.moveList.forEach(m => {
+            this.movementsList.removeChild(m);
+        })
+        this.moveList = [];
+        
         this.pegDisks = {0: [], 1: [], 2: []}; // Reinicializa as hastes
 
         // Adiciona discos e hastes novamente
@@ -114,7 +126,7 @@ class Game {
             const size = baseDiskSize - (i * sizeDecrement);
             const y = this.baseHeight+0.5 + (i * this.diskHeight);  // Empilhando os discos na base
             const color = new THREE.Color(`${this.colors[i]}`);
-            const disk = this.createDisk(size, color, y, 0);
+            const disk = this.createDisk(size, color, y, 1);
             this.scene.add(disk);
         }
     }
@@ -122,18 +134,18 @@ class Game {
     async solve() {
         let steps = [];
         function h(numDisks, from, to) {
-            let other = 6 - (from + to);
+            let other = 3 - (from + to);
             if (numDisks != 0) {
                 h(numDisks - 1, from, other);
                 steps.push([from, to]);
                 h(numDisks - 1, other, to);
             }
         }
-        h(this.numDisks, 2, 3);
+        h(this.numDisks, 1, 2);
         console.log(steps);
-
+        console.log(this.pegDisks);
         for (let i = 0; i < steps.length; i++) {
-            await this.moveDisk(steps[i][0] - 1, steps[i][1] - 1);
+            await this.moveDisk(steps[i][0], steps[i][1]);
         }
     }
 
@@ -141,96 +153,67 @@ class Game {
         console.log(fromPeg, toPeg)
         const disk = this.pegDisks[fromPeg].pop(); // Retira o último disco da haste de origem
         if (!disk) return;
-
+        console.log(disk);
         const targetY = this.baseHeight + .5 + (this.pegDisks[toPeg].length * this.diskHeight);
 
         // Movimento 1: Levantar o disco
+        console.log('levantar')
         await this.animateMovement(disk, { y: 9 });
-        console.log()
+        this.addMovementToList(fromPeg, toPeg);
 
         // Movimento 2: Mover horizontalmente para a haste de destino
         const targetX = (toPeg - 1) * 14;
+        console.log('mover horizontal')
         await this.animateMovement(disk, { x: targetX });
 
         // Movimento 3: Descer o disco
+        console.log('descer')
         await this.animateMovement(disk, { y: targetY });
 
         this.pegDisks[toPeg].push(disk); // Adiciona o disco à nova haste
     }
 
-    // animateMovement(disk, targetPosition) {
-    //     const duration = 1000; // Duração da animação em milissegundos
-    //     return new Promise(resolve => {
-    //         const startPosition = { x: disk.position.x, y: disk.position.y, z: disk.position.z };
-    //         const startTime = performance.now();
-    //         if(!this.isAnimating) {
-    //             return;
-    //         }
-    //         const animate = (time) => {
-    //             if (!this.isAnimating) {
-    //                 return; // Se a animação deve ser parada, sair imediatamente
-    //             }
-    
-    //             const elapsed = time - startTime;
-    //             const t = Math.min(elapsed / duration, 1); // Progresso da animação (de 0 a 1)
-    
-    //             // Atualizar a posição do disco
-    //             if (targetPosition.x !== undefined) {
-    //                 disk.position.x = startPosition.x + (targetPosition.x - startPosition.x) * t;
-    //             }
-    //             if (targetPosition.y !== undefined) {
-    //                 disk.position.y = startPosition.y + (targetPosition.y - startPosition.y) * t;
-    //             }
-    //             if (targetPosition.z !== undefined) {
-    //                 disk.position.z = startPosition.z + (targetPosition.z - startPosition.z) * t;
-    //             }
-    
-    //             if (t < 1) {
-    //                 requestAnimationFrame(animate);
-    //             } else {
-    //                 // Garantir que a posição final é exata
-    //                 if (targetPosition.x !== undefined) disk.position.x = targetPosition.x;
-    //                 if (targetPosition.y !== undefined) disk.position.y = targetPosition.y;
-    //                 if (targetPosition.z !== undefined) disk.position.z = targetPosition.z;
-    
-    //                 resolve(); // Resolve a promessa quando a animação estiver completa
-    //             }
-    //         };
-
-    //         requestAnimationFrame(animate);
-    //     });
-    // }
-
     animateMovement(disk, targetPosition) {
-        const mixer = new THREE.AnimationMixer(disk);
-    
-        const positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1], [
-            disk.position.x, disk.position.y, disk.position.z,
-            targetPosition.x || disk.position.x, targetPosition.y || disk.position.y, targetPosition.z || disk.position.z
-        ]);
-    
-        const clip = new THREE.AnimationClip('move', 1, [positionKF]);
-        const action = mixer.clipAction(clip);
-        action.play();
-    
+        const duration = 500; // Duração da animação em milissegundos
         return new Promise(resolve => {
-            const clock = new THREE.Clock();
-            const animate = () => {
-                // if (!this.isAnimating) {
-                //     return;
-                // }
+            const startPosition = { x: disk.position.x, y: disk.position.y, z: disk.position.z };
+            const startTime = performance.now();
+            const animate = (time) => {
     
-                const delta = clock.getDelta();
-                mixer.update(delta);
+                const elapsed = time - startTime;
+                const t = Math.min(elapsed / duration, 1); // Progresso da animação (de 0 a 1)
     
-                if (action.isRunning()) {
+                // Atualizar a posição do disco
+                if (targetPosition.x !== undefined) {
+                    disk.position.x = startPosition.x + (targetPosition.x - startPosition.x) * t;
+                }
+                if (targetPosition.y !== undefined) {
+                    disk.position.y = startPosition.y + (targetPosition.y - startPosition.y) * t;
+                }
+                if (targetPosition.z !== undefined) {
+                    disk.position.z = startPosition.z + (targetPosition.z - startPosition.z) * t;
+                }
+    
+                if (t < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    resolve();
+                    // Garantir que a posição final é exata
+                    this.isAnimating = true;
+                    
+                    resolve(); // Resolve a promessa quando a animação estiver completa
                 }
             };
-            animate();
+
+            requestAnimationFrame(animate);
         });
+    }
+
+    addMovementToList(from, to) {
+        const letters = {0: 'A', 1: 'B', 2: 'C'};
+        const li = document.createElement('li');
+        li.appendChild(document.createTextNode(`Mova de ${letters[from]} para ${letters[to]}`))
+        this.movementsList.appendChild(li);
+        this.moveList.push(li);
     }
 
     createPeg(x) {
