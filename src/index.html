@@ -10,34 +10,45 @@
 
 <body>
     <h1>Torres de Hanoi</h1>
-    <div>
-        <p>Escolha a quantidade de discos: </p>
+    <div id="selects">
+        <label for="fromPeg">De: </label>
         <select id="fromPeg">
             <option value="0">A</option>
             <option value="1" selected>B</option>
             <option value="2">C</option>
         </select>
+
+        <label for="toPeg">Para: </label>
         <select id="toPeg">
             <option value="0">A</option>
             <option value="1">B</option>
             <option value="2" selected>C</option>
         </select>
+
+        <label for="numberDisks">Número de discos: </label>
         <input type="number" name="discs" id="numberDisks" min="1" max="8">
+    </div>
+    <div id="buttons">
         <button id="solve">Resolver</button>
         <button id="reset">Reiniciar</button>
     </div>
-    <section id="side">
-        <div>
-            <canvas id="canvas"></canvas>
-        </div>
-        <div id="movements">
-            <p>Movimentos</p>
-            <ol id="movementsList">
-            </ol>
-        </div>
-    </section>
 
-    <script type="module" src="./script.js"></script>
+    <body>
+        <section id="side">
+            <div>
+                <canvas id="canvas" width="800" height="400"></canvas>
+            </div>
+            <div id="movements">
+                <p>Movimentos</p>
+                <ol id="movementsList">
+                </ol>
+            </div>
+        </section>
+    </body>
+
+</html>
+
+<script type="module" src="./script.js"></script>
 </body>
 
 </html>
