@@ -25,7 +25,7 @@ class Game {
         this.buttonSolve.addEventListener('click', async () => {
             await this.solve();
         })
-        this.buttonReset = document.querySelector('#solve');
+        this.buttonReset = document.querySelector('#reset');
         this.buttonReset.addEventListener('click', async () => {
             this.reset();
         })
@@ -34,7 +34,7 @@ class Game {
         this.inputDisks.addEventListener('change', () => {
             this.clearDisks();
             this.numDisks = this.inputDisks.value;
-            this.pegDisks = {0: [], 1:  [], 2: []};
+            this.pegDisks = {0: [], 1: [], 2: []};
             this.addDisksToScene();
         })
 
@@ -179,7 +179,6 @@ class Game {
             const startPosition = { x: disk.position.x, y: disk.position.y, z: disk.position.z };
             const startTime = performance.now();
             const animate = (time) => {
-    
                 const elapsed = time - startTime;
                 const t = Math.min(elapsed / duration, 1); // Progresso da animação (de 0 a 1)
     
@@ -197,9 +196,6 @@ class Game {
                 if (t < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    // Garantir que a posição final é exata
-                    this.isAnimating = true;
-                    
                     resolve(); // Resolve a promessa quando a animação estiver completa
                 }
             };
@@ -211,7 +207,7 @@ class Game {
     addMovementToList(from, to) {
         const letters = {0: 'A', 1: 'B', 2: 'C'};
         const li = document.createElement('li');
-        li.appendChild(document.createTextNode(`Mova de ${letters[from]} para ${letters[to]}`))
+        li.appendChild(document.createTextNode(`${letters[from]} → ${letters[to]}`))
         this.movementsList.appendChild(li);
         this.moveList.push(li);
     }
