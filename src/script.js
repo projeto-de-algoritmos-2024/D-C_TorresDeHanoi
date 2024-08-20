@@ -9,7 +9,6 @@ class Game {
         this.isAnimating = true;
         this.disks = [];
         this.moveList = [];
-
         this.controller = new AbortController();
 
         this.pegDisks = { 0: [], 1: [], 2: [] }; // Discos em cada haste
@@ -36,11 +35,6 @@ class Game {
         this.toPeg.addEventListener('change', () => {
         })
 
-        this.buttonSolve = document.querySelector('#solve');
-        this.buttonSolve.addEventListener('click', async () => {
-            await this.solve();
-        })
-
         this.inputDisks = document.querySelector('#numberDisks');
         this.inputDisks.value = this.numDisks;
         this.inputDisks.addEventListener('change', () => {
@@ -62,6 +56,13 @@ class Game {
         this.buttonReset = document.querySelector('#reset');
         this.buttonReset.addEventListener('click', async () => {
             this.reset();
+        })
+
+        this.buttonSolve = document.querySelector('#solve');
+        this.buttonSolve.addEventListener('click', async () => {
+            if (this.abort.signal) this.renewAbort();
+            this.clearMovementsList();
+            await this.solve();
         })
 
         this.movementsList = document.querySelector('#movementsList');
@@ -105,13 +106,13 @@ class Game {
         this.stop = false;
         this.render();
     }
-    
+
     // Função para parar a animação
     stopAnimation() {
         this.isAnimating = false;
         this.stop = true;
     }
-    
+
     abort() {
         this.controller.abort();
     }
@@ -129,10 +130,7 @@ class Game {
 
         // Limpa a cena atual
         this.clearDisks();
-        this.moveList.forEach(m => {
-            this.movementsList.removeChild(m);
-        })
-        this.moveList = [];
+        this.clearMovementsList();
 
         this.pegDisks = { 0: [], 1: [], 2: [] }; // Reinicializa as hastes
 
@@ -146,13 +144,19 @@ class Game {
         this.startAnimation();
     }
 
+    clearMovementsList() {
+        this.moveList.forEach(m => {
+            this.movementsList.removeChild(m);
+        })
+        this.moveList = [];
+    }
+
     clearDisks() {
-        // Remover todos os discos da cena
         this.disks.forEach(disk => {
             this.scene.remove(disk);
         });
 
-        this.disks = []; // Limpar o array de discos
+        this.disks = [];
     }
 
     addDisksToScene(peg = 1) {
@@ -200,32 +204,27 @@ class Game {
     }
 
     async moveDisk(fromPeg, toPeg) {
-        // console.log(fromPeg, toPeg)
         const disk = this.pegDisks[fromPeg].pop(); // Retira o último disco da haste de origem
         if (!disk) return;
-        // console.log(disk);
         const targetY = this.baseHeight + .5 + (this.pegDisks[toPeg].length * this.diskHeight);
 
         // Movimento 1: Levantar o disco
-        // console.log('levantar')
         await this.animateMovement(disk, { y: 9 });
         this.addMovementToList(fromPeg, toPeg);
 
         // Movimento 2: Mover horizontalmente para a haste de destino
         const targetX = (toPeg - 1) * 14;
-        // console.log('mover horizontal')
         await this.animateMovement(disk, { x: targetX });
 
         // Movimento 3: Descer o disco
-        // console.log('descer')
         await this.animateMovement(disk, { y: targetY });
 
-        this.pegDisks[toPeg].push(disk); // Adiciona o disco à nova haste
+        this.pegDisks[toPeg].push(disk);
     }
 
     async animateMovement(disk, targetPosition) {
         const duration = 500; // Duration of the animation in milliseconds
-        const signal = this.controller.signal; // Get the abort signal
+        const signal = this.controller.signal;
 
         return new Promise((resolve, reject) => {
             const startPosition = { x: disk.position.x, y: disk.position.y, z: disk.position.z };
@@ -233,14 +232,12 @@ class Game {
 
             const animate = (time) => {
                 if (signal.aborted) {
-                    // reject(new Error('Animation cancelled'));
                     return;
                 }
 
                 const elapsed = time - startTime;
-                const t = Math.min(elapsed / duration, 1); // Progress of the animation (0 to 1)
+                const t = Math.min(elapsed / duration, 1); // progresso da animação (0 to 1)
 
-                // Update disk position
                 if (targetPosition.x !== undefined) {
                     disk.position.x = startPosition.x + (targetPosition.x - startPosition.x) * t;
                 }
@@ -254,7 +251,7 @@ class Game {
                 if (t < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    resolve(); // Resolve the promise when the animation is complete
+                    resolve();
                 }
             };
 
@@ -263,59 +260,58 @@ class Game {
     }
 
 
-addMovementToList(from, to) {
-    const letters = { 0: 'A', 1: 'B', 2: 'C' };
-    const li = document.createElement('li');
-    li.appendChild(document.createTextNode(`${letters[from]} → ${letters[to]}`))
-    this.movementsList.appendChild(li);
-    this.moveList.push(li);
-}
-
-createPeg(x) {
-    const height = 15;
-    const geometry = new THREE.CylinderGeometry(0.38, .38, height, 32);
-    const material = new THREE.MeshBasicMaterial({ color: 0x37251f });
-    const peg = new THREE.Mesh(geometry, material);
-    peg.position.x = x;
-    peg.position.y = this.baseHeight + 7;
-    peg.position.z = 0; // Alinhar hastes no eixo Z
-
-    return peg;
-}
-
-addPegsToScene() {
-    const peg1 = this.createPeg(-14);
-    const peg2 = this.createPeg(0);
-    const peg3 = this.createPeg(14);
-    // const pegs =  [peg1, peg2, peg3]
-    this.scene.add(peg1);
-    this.scene.add(peg2);
-    this.scene.add(peg3);
-}
-
-createPlatform() {
-    const width = 44;  // Largura da plataforma
-    const depth = 15;   // Profundidade da plataforma
-    const height = 1;  // Altura da plataforma
-
-    const geometry = new THREE.BoxGeometry(width, height, depth);
-    const material = new THREE.MeshBasicMaterial({ color: 0x8B4513 }); // Cor marrom para a plataforma
-    const platform = new THREE.Mesh(geometry, material);
-
-    platform.position.y = this.baseHeight - height / 2 - 0.25; // Posicionar abaixo das hastes
-
-    this.scene.add(platform);
-}
-
-render = (time) => {
-    if (this.isAnimating) {
-
-        this.controls.update();
-        this.renderer.render(this.scene, this.camera);
-
-        requestAnimationFrame(this.render);
+    addMovementToList(from, to) {
+        const letters = { 0: 'A', 1: 'B', 2: 'C' };
+        const li = document.createElement('li');
+        li.appendChild(document.createTextNode(`${letters[from]} → ${letters[to]}`))
+        this.movementsList.appendChild(li);
+        this.moveList.push(li);
     }
-}
+
+    createPeg(x) {
+        const height = 15;
+        const geometry = new THREE.CylinderGeometry(0.38, .38, height, 32);
+        const material = new THREE.MeshBasicMaterial({ color: 0x37251f });
+        const peg = new THREE.Mesh(geometry, material);
+        peg.position.x = x;
+        peg.position.y = this.baseHeight + 7;
+        peg.position.z = 0; // Alinhar hastes no eixo Z
+
+        return peg;
+    }
+
+    addPegsToScene() {
+        const peg1 = this.createPeg(-14);
+        const peg2 = this.createPeg(0);
+        const peg3 = this.createPeg(14);
+        this.scene.add(peg1);
+        this.scene.add(peg2);
+        this.scene.add(peg3);
+    }
+
+    createPlatform() {
+        const width = 44;  // Largura da plataforma
+        const depth = 15;   // Profundidade da plataforma
+        const height = 1;  // Altura da plataforma
+
+        const geometry = new THREE.BoxGeometry(width, height, depth);
+        const material = new THREE.MeshBasicMaterial({ color: 0x8B4513 }); // Cor marrom para a plataforma
+        const platform = new THREE.Mesh(geometry, material);
+
+        platform.position.y = this.baseHeight - height / 2 - 0.25; // Posicionar abaixo das hastes
+
+        this.scene.add(platform);
+    }
+
+    render = (time) => {
+        if (this.isAnimating) {
+
+            this.controls.update();
+            this.renderer.render(this.scene, this.camera);
+
+            requestAnimationFrame(this.render);
+        }
+    }
 
 }
 
