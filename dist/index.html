@@ -1,15 +1,56 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Torres de Hanói</title>
-  <script type="module" crossorigin src="/D-C_TorresDeHanoi/assets/index-Ds7h7jgw.js"></script>
-  <link rel="stylesheet" crossorigin href="/D-C_TorresDeHanoi/assets/index-CtP6Fa66.css">
+  <script type="module" crossorigin src="/D-C_TorresDeHanoi/assets/index-rqcGHNIH.js"></script>
+  <link rel="stylesheet" crossorigin href="/D-C_TorresDeHanoi/assets/index-BFyfOQT8.css">
 </head>
+
 <body>
     <h1>Torres de Hanoi</h1>
-    <canvas id="canvas"></canvas>
+    <div id="selects">
+        <label for="fromPeg">De: </label>
+        <select id="fromPeg">
+            <option value="0">A</option>
+            <option value="1" selected>B</option>
+            <option value="2">C</option>
+        </select>
+
+        <label for="toPeg">Para: </label>
+        <select id="toPeg">
+            <option value="0">A</option>
+            <option value="1">B</option>
+            <option value="2" selected>C</option>
+        </select>
+
+        <label for="numberDisks">Número de discos: </label>
+        <input type="number" name="discs" id="numberDisks" min="1" max="8">
+    </div>
+    <div id="buttons">
+        <button id="solve">Resolver</button>
+        <button id="reset">Reiniciar</button>
+    </div>
+
+    <body>
+        <section id="side">
+            <div>
+                <canvas id="canvas" width="800" height="400"></canvas>
+            </div>
+            <div class="container">
+                <p id="movementsTitle">Movimentos <span id="count"></span><span id="total"></span></p>
+                <div id="movements">
+                    <ol id="movementsList">
+                    </ol>
+                </div>
+            </div>
+        </section>
+    </body>
+
+</html>
 
 </body>
+
 </html>

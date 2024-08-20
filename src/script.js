@@ -195,6 +195,9 @@ class Game {
     }
 
     async solve() {
+        this.counter = 0;
+        this.count.innerText = '';
+        this.numMoves.innerText = '';
         let steps = [];
         function h(numDisks, from, to) {
             let other = 3 - (from + to);

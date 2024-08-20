@@ -1,44 +1,36 @@
-**!! Atenção: Renomeie o seu repositório para (Tema)_(NomeDoProjeto). !!** 
+# Torres de Hanoi
 
-Temas:
- - Grafos1
- - Grafos2
- - PD
- - D&C
- - Greed
- - Final 
- 
- **!! *Não coloque os nomes dos alunos no título do repositório*. Exemplo de título correto: Grafos2_Labirinto-do-Minotauro !!**
- 
- (Apague essa seção)
-
-# NomedoProjeto
-
-**Número da Lista**: X<br>
-**Conteúdo da Disciplina**: XXXXXXXXXX<br>
+**Conteúdo da Disciplina**: Dividir e conquistar<br>
 
 ## Alunos
-|Matrícula | Aluno |
-| -- | -- |
-| xx/xxxxxx  |  xxxx xxxx xxxxx |
-| xx/xxxxxx  |  xxxx xxxx xxxxx |
+| Matrícula   | Aluno                         |
+| ----------- | ----------------------------- |
+| 21/1039250  |  Arthur Grandão de Mello      |
+| 21/1029540  |  Pedro Sena Barbosa Holtz Yen |
 
 ## Sobre 
-Descreva os objetivos do seu projeto e como ele funciona. 
+
+O nosso projeto busca reproduzir o jogo Torres de Hanoi tridimensionalmente, mostrando a solução ótima com os passos necessários. 
 
 ## Screenshots
-Adicione 3 ou mais screenshots do projeto em funcionamento.
+
+![alt text](img/image1.png)
+
+![alt text](img/image2.png)
+
+![alt text](img/image3.png)
 
 ## Instalação 
-**Linguagem**: xxxxxx<br>
-**Framework**: (caso exista)<br>
-Descreva os pré-requisitos para rodar o seu projeto e os comandos necessários.
+**Linguagem**: Javascript <br>
+**Framework**: Three.js (Biblioteca)<br>
 
 ## Uso 
-Explique como usar seu projeto caso haja algum passo a passo após o comando de execução.
 
-## Outros 
-Quaisquer outras informações sobre seu projeto podem ser descritas abaixo.
+O site está hospedado no github. Acesse o link abaixo:
+
+[https://projeto-de-algoritmos-2024.github.io/D-C_TorresDeHanoi/](https://projeto-de-algoritmos-2024.github.io/D-C_TorresDeHanoi/)
+
+## [Apresentação](https://youtu.be/JtQ99NgGnCs) 
 
 
 
