@@ -44,6 +44,15 @@ class Game {
         this.inputDisks = document.querySelector('#numberDisks');
         this.inputDisks.value = this.numDisks;
         this.inputDisks.addEventListener('change', () => {
+            if (this.inputDisks.value > 8) {
+                document.getElementById('numberDisks').value = 8;
+                this.inputDisks.value = 8;
+            }
+            else if (this.inputDisks.value < 1) {
+                document.getElementById('numberDisks').value = 1;
+                this.inputDisks.value = 1;
+            }
+
             this.clearDisks();
             this.numDisks = this.inputDisks.value;
             this.pegDisks = { 0: [], 1: [], 2: [] };
