@@ -43,6 +43,13 @@ body {
     outline: none; /* Optional: remove outline on focus */
 }
 
+.container {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    align-items: center;
+}
+
 #solve {
     color: #ffffff;
     background-color: #202020;
@@ -71,7 +78,7 @@ body {
     flex-wrap: nowrap;
 }
 
-#movements {
+#movementsTitle { 
     width: 300px;
     max-height: 410px;
     overflow-y: auto;
@@ -82,6 +89,20 @@ body {
     box-sizing: border-box;
     margin-left: 20px;
     margin-top: 30px;
+    margin-top: 0;
+    font-weight: bold;
+}
+
+#movements {
+    width: 300px;
+    max-height: 410px;
+    overflow-y: auto;
+    border: 1px solid #000000;
+    background-color: #000000;
+    color: #ffffff;
+    padding: 10px;
+    box-sizing: border-box;
+    margin-left: 20px;
 }
 
 #movements p {

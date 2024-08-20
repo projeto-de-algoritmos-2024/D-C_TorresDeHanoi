@@ -10,6 +10,7 @@ class Game {
         this.disks = [];
         this.moveList = [];
         this.controller = new AbortController();
+        this.counter = 0;
 
         this.pegDisks = { 0: [], 1: [], 2: [] }; // Discos em cada haste
         this.fov = 50;
@@ -34,6 +35,11 @@ class Game {
         this.toPeg = document.querySelector('#toPeg');
         this.toPeg.addEventListener('change', () => {
         })
+
+        this.numMoves = document.querySelector('#total');
+        this.numMoves.innerText = '';
+
+        this.count = document.querySelector('#count');
 
         this.inputDisks = document.querySelector('#numberDisks');
         this.inputDisks.value = this.numDisks;
@@ -127,6 +133,9 @@ class Game {
 
         this.resetSelects();
         this.numDisks = 8;
+        this.counter = 0;
+        this.count.innerText = '';
+        this.numMoves.innerText = '';
 
         // Limpa a cena atual
         this.clearDisks();
@@ -197,10 +206,12 @@ class Game {
         }
         if (parseInt(this.fromPeg.value) !== parseInt(this.toPeg.value)) {
             h(this.numDisks, parseInt(this.fromPeg.value), parseInt(this.toPeg.value));
+            this.numMoves.innerText = ` / ${2**this.numDisks - 1}`;
             for (let i = 0; i < steps.length; i++) {
                 await this.moveDisk(steps[i][0], steps[i][1]);
             }
         }
+
     }
 
     async moveDisk(fromPeg, toPeg) {
@@ -266,6 +277,7 @@ class Game {
         li.appendChild(document.createTextNode(`${letters[from]} → ${letters[to]}`))
         this.movementsList.appendChild(li);
         this.moveList.push(li);
+        this.count.innerText = `${++this.counter}`;
     }
 
     createPeg(x) {
